@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import pick from 'lodash/pick';
 
 let Pikaday;
 if ('undefined' !== typeof window) {
@@ -18,6 +17,10 @@ class ReactPikadayComponent extends React.Component {
         name: PropTypes.string,
         style: PropTypes.object,
         tabIndex: PropTypes.number,
+        container: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.object // DOM element
+        ]),
         valueLink: PropTypes.shape({
             value: PropTypes.instanceOf(Date),
             requestChange: PropTypes.func.isRequired
@@ -64,8 +67,7 @@ class ReactPikadayComponent extends React.Component {
     }
 
     render() {
-        const { type, container } = this.props;
-        const rest = pick(this.props, ['id', 'className', 'name', 'tabIndex', 'disabled', 'placeholder', 'readOnly', 'style']);
+        const { id, container, type, className, name, tabIndex, disabled, placeholder, readOnly, style } = this.props;
 
         if (container === true) {
             return (
@@ -73,7 +75,6 @@ class ReactPikadayComponent extends React.Component {
                     <input
                         type="hidden"
                         ref="pikaday"
-                        {...rest}
                     />
                     <div ref="pikadayContainer"></div>
                 </div>
@@ -82,9 +83,16 @@ class ReactPikadayComponent extends React.Component {
 
         return (
             <input
+                id={id}
                 type={type}
                 ref="pikaday"
-                {...rest}
+                name={name}
+                className={className}
+                style={style}
+                placeholder={placeholder}
+                disabled={disabled}
+                readOnly={readOnly}
+                tabIndex={tabIndex}
             />
         );
     }
@@ -101,12 +109,18 @@ class ReactPikadayComponent extends React.Component {
         const { requestChange } = this._getValueLink(this.props);
         const { value, onChange, valueLink, container, ...pikadayOptions } = this.props; // eslint-disable-line no-unused-vars
 
-        const options = Object.assign({}, pikadayOptions, {
+        let fieldOptions = {
             field: el,
-            container: container === true ? this.refs.pikadayContainer :
-                container && container.getDOMNode ? container.getDOMNode() : container,
             onSelect: requestChange
-        });
+        };
+
+        if (container) {
+            fieldOptions.container = container === true ? this.refs.pikadayContainer :
+                container && container.getDOMNode ? container.getDOMNode() : container;
+            fieldOptions.bound = false;
+        }
+
+        const options = Object.assign({}, pikadayOptions, fieldOptions);
 
         this.pikaday = new Pikaday(options);
 
