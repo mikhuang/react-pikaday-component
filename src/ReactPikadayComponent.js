@@ -69,14 +69,14 @@ class ReactPikadayComponent extends React.Component {
     render() {
         const { id, container, type, className, name, tabIndex, disabled, placeholder, readOnly, style } = this.props;
 
-        if (container === true) {
+        if (container) {
             return (
                 <div>
                     <input
                         type="hidden"
                         ref="pikaday"
                     />
-                    <div ref="pikadayContainer"></div>
+                    {container !== true && <div ref="pikadayContainer"></div>}
                 </div>
             );
         }
@@ -124,7 +124,7 @@ class ReactPikadayComponent extends React.Component {
 
         this.pikaday = new Pikaday(options);
 
-        if (container === true) {
+        if (container) {
             this.pikaday.show();
         }
     }
